@@ -32,6 +32,17 @@ export default function Register() {
       contact: formData.contact,
       isSeller: formData.isSeller,
     });
+
+    setFormData({
+    fullName: "",
+    email: "",
+    contact: "",
+    password: "",
+    isSeller: false,
+  });
+
+
+
     navigate("/")
 
   };
