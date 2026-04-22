@@ -73,3 +73,35 @@ export const login = async (req, res) => {
   }
 };
 
+
+
+export const googleCallBack = async ( req, res ) => {
+  const { id, displayName, emails, photos } = req.user
+  const email = emails[0].value;
+  const profilePic = photos[0].value
+
+  let user = await userModel.findOne({
+    email
+  });
+
+  if(!user) {
+    user = await userModel.create({
+      email,
+      fullName:displayName,
+      googleId:id
+
+    })
+  }
+
+ const token = JWT.sign(
+    {
+      id: user._id,
+    },
+    config.JWT_SECRET,
+    { expiresIn: "7d" },
+  );
+
+  res.cookie("token", token);
+
+  res.redirect("http://localhost:5173/")
+}

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
+import ContinuewithGoogle from "../components/ContinuewithGoogle";
 
 export default function Register() {
   const { handleRegister } = useAuth();
@@ -223,10 +224,11 @@ export default function Register() {
                     className="w-4 h-4 accent-yellow-500 cursor-pointer"
                   />
 
-                  <span className="text-sm font-headline tracking-tighter font-bold">
+                  <span className="text-sm font-headline tracking-tighter font-bold whitespace-nowrap ">
                     Register as a Seller
                   </span>
                 </label>
+               <ContinuewithGoogle/>
               </div>
 
               <div className="pt-4">

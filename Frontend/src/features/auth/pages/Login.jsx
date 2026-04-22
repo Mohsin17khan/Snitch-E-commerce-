@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
+import ContinuewithGoogle from '../components/ContinuewithGoogle';
 
 export default function Login() {
 
@@ -134,6 +135,7 @@ export default function Login() {
                   Sign In
                 </button>
               </div>
+              <ContinuewithGoogle  />
             </form>  
 
 
