@@ -6,6 +6,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 import  passport from 'passport'
 import cors from 'cors'
 import { config } from './config/config.js';
+import postRouter from './routes/product.routes.js';
 
 
 
@@ -30,6 +31,7 @@ passport.use(new GoogleStrategy({
 
 
 app.use("/api/auth", authRouter);
+app.use("/api/product", postRouter)
 
 
 export default app;

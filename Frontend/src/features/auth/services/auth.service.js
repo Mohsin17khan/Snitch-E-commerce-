@@ -37,3 +37,8 @@ export const login = async ({email, password}) =>  {
     }
  
 }
+
+export const getMe = async () => {
+    const response = await API_INSTANCE.get("/getme");
+    return response.data
+}

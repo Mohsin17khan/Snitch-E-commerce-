@@ -73,8 +73,6 @@ export const login = async (req, res) => {
   }
 };
 
-
-
 export const googleCallBack = async ( req, res ) => {
   const { id, displayName, emails, photos } = req.user
   const email = emails[0].value;
@@ -104,4 +102,19 @@ export const googleCallBack = async ( req, res ) => {
   res.cookie("token", token);
 
   res.redirect("http://localhost:5173/")
+}
+
+export const getme = async ( req, res ) => {
+  const user = req.user
+
+  res.status(201).json({
+    message:'User fetch successfully',
+    user:{
+      id: user.id,
+      email: user.email,
+      contact: user.contact,
+      fullName: user.fullName,
+      role: user.role
+    }
+  })
 }

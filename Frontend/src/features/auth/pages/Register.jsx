@@ -25,7 +25,7 @@ export default function Register() {
   const onSubmit = async (e) => {
     e.preventDefault();
 
-    await handleRegister({
+   const user =  await handleRegister({
       email: formData .email,
       password: formData.password,
       fullName: formData.fullName,
@@ -41,9 +41,12 @@ export default function Register() {
     isSeller: false,
   });
 
-
-
+  if(user.role == "buyer"){
     navigate("/")
+  } else if(user.role == "seller"){
+    navigate("/seller/dashboard")
+
+  }
 
   };
   return (

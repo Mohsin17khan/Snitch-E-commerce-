@@ -28,11 +28,16 @@ export default function Login() {
       return;
     }
 
-   await handleLogin({
+  const user =  await handleLogin({
     email: formData.email,
     password: formData.password 
    });
-   navigate("/")
+
+   if(user.role == "buyer"){
+     navigate("/")
+   } else if ( user.role == "seller"){
+    navigate("/seller/dashboard")
+   }
   };
 
   
@@ -195,123 +200,3 @@ export default function Login() {
   );
 }
 
-
-// import React, { useState } from 'react';
-// import { Link } from 'react-router';
-// import { useAuth } from '../hooks/useAuth';
-
-// export default function Login() {
-
-
-//   return (
-//     <div className="bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container min-h-screen">
-      
-//       <style>
-//         {`
-//           .material-symbols-outlined {
-//             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-//           }
-//           .cinematic-gradient {
-//             background: linear-gradient(180deg, rgba(19, 19, 19, 0) 0%, rgba(19, 19, 19, 0.8) 70%, rgba(19, 19, 19, 1) 100%);
-//           }
-//         `}
-//       </style>
-
-//       {/* Header */}
-//       <header className="bg-[#131313] flex justify-between items-center w-full px-8 py-6 fixed top-0 z-50 bg-gradient-to-b from-[#131313] to-transparent">
-//         <div className="flex items-center gap-2">
-//           <span className="material-symbols-outlined text-[#ffd700]" style={{ fontVariationSettings: "'FILL' 1" }}>
-//             security
-//           </span>
-//           <h1 className="text-2xl font-bold tracking-widest text-[#ffd700] uppercase">
-//             SNITCH
-//           </h1>
-//         </div>
-//       </header>
-
-//       <main className="min-h-screen flex flex-col relative overflow-hidden">
-
-//         {/* Hero */}
-//         <section className="relative h-[397px] w-full overflow-hidden">
-//           <img
-//             alt="Intel visual"
-//             className="absolute inset-0 w-full h-full object-cover"
-//             src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAgmZItz9z3--nQFBhLuQQpB9UF38Gu_y-JQAOdm-XHLMM3dIIlciJ0_bUJb_ETsPAFd7goM0YCBU0ElPfLuDaokpmxbO43weUWO9dUOJtghg8hrUA5xu_2LDltYCLN9LU4C7xO4R5AYWv5aZBT6fs006CBPtFSHgF8hTKTHZ8ngG6osy9NRh1otPueyaGksxhPJ-4I_QcB0JYGD6FT7Q_n7q9HR82o5dQwSXV8zqei_CwdEHugz4gs-W1ftFLiCTFy7TqeWHydBXv"
-//           />
-//           <div className="absolute inset-0 cinematic-gradient"></div>
-//           <div className="absolute bottom-8 px-8 w-full">
-//             <p className="text-[#ffd700] text-xs uppercase tracking-[0.3em] mb-2">Authenticated Entry</p>
-//             <h2 className="text-4xl font-bold text-white">SYSTEM LOGIN</h2>
-//           </div>
-//         </section>
-
-//         {/* FORM SECTION */}
-//         <section className="flex-1 bg-background px-8 pt-4 pb-12 relative z-10 -mt-4 rounded-t-[2rem]">
-//           <div className="max-w-md mx-auto">
-
-//             {/* ✅ FORM START */}
-//             <form onSubmit={onSubmit} className="space-y-6">
-
-//               {/* Email */}
-//               <div className="space-y-2 group">
-//                 <label className="text-[10px] font-bold uppercase tracking-widest">
-//                   Email Address
-//                 </label>
-//                 <div className="relative">
-//                   <input
-//                     name="email"
-//                     type="email"
-//                     value={formData.email}
-//                     onChange={handleChange}
-//                     placeholder="agent@snitch.intel"
-//                     className="w-full border-b-2 py-4 px-4 bg-transparent"
-//                   />
-//                 </div>
-//               </div>
-
-//               {/* Password */}
-//               <div className="space-y-2 group">
-//                 <label className="text-[10px] font-bold uppercase tracking-widest">
-//                   Password
-//                 </label>
-//                 <div className="relative">
-//                   <input
-//                     name="password"
-//                     type="password"
-//                     value={formData.password}
-//                     onChange={handleChange}
-//                     placeholder="••••••••"
-//                     className="w-full border-b-2 py-4 px-4 bg-transparent"
-//                   />
-//                 </div>
-//               </div>
-
-//               {/* Button */}
-//               <div className="pt-4">
-//                 <button
-//                   type="submit"
-//                   className="w-full bg-yellow-500 text-black py-4 font-bold uppercase"
-//                 >
-//                   Sign In
-//                 </button>
-//               </div>
-
-//             </form>
-//             {/* ✅ FORM END */}
-
-//             <div className="text-center pt-6">
-//               <p className="text-sm">
-//                 Don't have an account?
-//                 <Link to="/register" className="text-yellow-500 ml-1">
-//                   Register
-//                 </Link>
-//               </p>
-//             </div>
-
-//           </div>
-//         </section>
-
-//       </main>
-//     </div>
-//   );
-// }
