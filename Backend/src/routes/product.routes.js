@@ -1,6 +1,6 @@
 import express from 'express'
 import { productValidation } from '../validators/product.validation.js';
-import { createProduct, getAllProducts, getSellerProduct } from '../controllers/product.controller.js';
+import { createProduct, getAllProducts, getProductDetail, getSellerProduct } from '../controllers/product.controller.js';
 import { authenticateSeller } from '../middlewares/auth.middleware.js';
 import multer, { memoryStorage } from 'multer'
 
@@ -21,5 +21,6 @@ postRouter.get("/seller", authenticateSeller, getSellerProduct);
 
 postRouter.get("/allProducts", getAllProducts)
 
+postRouter.get("/productDetail/:productId", getProductDetail)
 
 export default postRouter

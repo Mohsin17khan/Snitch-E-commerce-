@@ -5,6 +5,7 @@ import Protected from "../features/auth/components/Protected";
 import Dashboard from "../features/products/pages/Dashboard";
 import CreateProduct from "../features/products/pages/CreateProduct";
 import Home from "../features/products/pages/Home";
+import ProductDetailed from "../features/products/pages/ProductDetailed";
 
 export const router = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ export const router = createBrowserRouter([
    {
     path:"/seller/create",
     element:  <Protected role="seller"> <CreateProduct/> </Protected> 
+  },
+   {
+    path:"/product/detail/:productId",
+    element:  <ProductDetailed/>
   },
   
   
