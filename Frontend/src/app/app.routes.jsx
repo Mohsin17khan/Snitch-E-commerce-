@@ -4,11 +4,12 @@ import Login from "../features/auth/pages/Login";
 import Protected from "../features/auth/components/Protected";
 import Dashboard from "../features/products/pages/Dashboard";
 import CreateProduct from "../features/products/pages/CreateProduct";
+import Home from "../features/products/pages/Home";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <h1>Home</h1>,
+    element: <Home/>,
   },
   {
     path: "/register",
