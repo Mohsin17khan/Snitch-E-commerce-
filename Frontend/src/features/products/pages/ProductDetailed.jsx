@@ -45,6 +45,7 @@ const ProductDetailed = () => {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeImage, setActiveImage] = useState(0);
+    const [selectedVariantId, setSelectedVariantId] = useState(null);
     const navigate = useNavigate();
 
     async function fetchDetail() {
@@ -63,6 +64,16 @@ const ProductDetailed = () => {
         fetchDetail();
     }, [productId]);
 
+    useEffect(() => {
+        if (product?.variants?.length > 0 && !selectedVariantId) {
+            setSelectedVariantId(product.variants[0]._id);
+        }
+    }, [product]);
+
+    useEffect(() => {
+        setActiveImage(0);
+    }, [selectedVariantId]);
+
     if (loading) {
         return (
             <div className="min-h-screen bg-[#131313] flex items-center justify-center">
@@ -80,7 +91,20 @@ const ProductDetailed = () => {
         );
     }
 
-    const currentImage = product.images?.[activeImage]?.url;
+    console.log(product);
+    const selectedVariant = product.variants?.find(v => v._id === selectedVariantId) || null;
+    
+    const displayPriceAmount = selectedVariant?.price?.amount > 0 
+        ? selectedVariant.price.amount 
+        : product.price?.priceAmount;
+        
+    const displayPriceCurrency = selectedVariant?.price?.currency || product.price?.priceCurrency || "INR";
+    
+    const displayImages = selectedVariant?.images?.length > 0 
+        ? selectedVariant.images 
+        : product.images || [];
+        
+    const currentImage = displayImages?.[activeImage]?.url;
 
     return (
         <div className="min-h-screen bg-[#131313] text-[#e5e2e1] selection:bg-[#ffd700]/30 font-['Inter'] overflow-x-hidden">
@@ -121,12 +145,12 @@ const ProductDetailed = () => {
                     
                     {/* Left: Product Imagery */}
                     <div className="flex flex-col gap-6">
-                        <div className="relative aspect-[4/5] bg-[#201f1f] rounded-3xl overflow-hidden group">
+                        <div className="relative aspect-square bg-[#1a1a1a] rounded-2xl overflow-hidden group">
                             {currentImage ? (
                                 <img 
                                     src={currentImage} 
                                     alt={product.title} 
-                                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                                    className="w-full h-full object-contain p-8 transition-transform duration-700 hover:scale-105"
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center opacity-10">
@@ -142,9 +166,9 @@ const ProductDetailed = () => {
                         </div>
 
                         {/* Thumbnails */}
-                        {product.images?.length > 1 && (
+                        {displayImages?.length > 1 && (
                             <div className="grid grid-cols-4 gap-4">
-                                {product.images.map((img, idx) => (
+                                {displayImages.map((img, idx) => (
                                     <button 
                                         key={idx}
                                         onClick={() => setActiveImage(idx)}
@@ -171,7 +195,7 @@ const ProductDetailed = () => {
                             </h1>
                             <div className="flex items-end gap-3 mt-2">
                                 <span className="text-3xl font-bold text-[#ffd700] font-['Space_Grotesk']">
-                                    {formatPrice(product.price?.priceAmount, product.price?.priceCurrency)}
+                                    {formatPrice(displayPriceAmount, displayPriceCurrency)}
                                 </span>
                                 <span className="text-xs text-[#4d4732] uppercase tracking-widest mb-1.5 font-bold italic">Inc. All Duties</span>
                             </div>
@@ -213,31 +237,41 @@ const ProductDetailed = () => {
                             </div>
                         </div>
 
-                        {/* Size Selection Placeholder */}
-                        <div className="flex flex-col gap-4 mt-2">
-                             <div className="flex justify-between items-center">
-                                <h3 className="text-[11px] uppercase tracking-[0.3em] text-[#e5e2e1] font-bold">Select Dimension</h3>
-                                <button className="text-[9px] uppercase tracking-widest text-[#ffd700] font-bold border-b border-[#ffd700]/30 hover:border-[#ffd700] transition-colors pb-0.5">Measurement Guide</button>
-                             </div>
-                             <div className="flex gap-3">
-                                {['XS', 'S', 'M', 'L', 'XL'].map((size) => (
-                                    <button 
-                                        key={size}
-                                        className={`w-12 h-12 flex items-center justify-center text-[10px] font-bold rounded-xl border transition-all duration-300 ${size === 'M' ? 'bg-[#ffd700] text-black border-[#ffd700]' : 'border-white/10 text-[#999077] hover:border-white/30'}`}
-                                    >
-                                        {size}
-                                    </button>
-                                ))}
-                             </div>
-                        </div>
+                        {/* Variant Selection */}
+                        {product.variants?.length > 0 && (
+                            <div className="flex flex-col gap-4 mt-2">
+                                 <div className="flex justify-between items-center">
+                                    <h3 className="text-[11px] uppercase tracking-[0.3em] text-[#e5e2e1] font-bold">Select Variant</h3>
+                                 </div>
+                                 <div className="flex flex-wrap gap-3">
+                                    {product.variants.map((variant) => {
+                                        const isSelected = selectedVariantId === variant._id;
+                                        const hasAttributes = variant.attributes && Object.keys(variant.attributes).length > 0;
+                                        const attrString = hasAttributes 
+                                            ? Object.entries(variant.attributes).map(([k, v]) => `${k}: ${v}`).join(' | ') 
+                                            : "Base Option";
+                                            
+                                        return (
+                                            <button 
+                                                key={variant._id}
+                                                onClick={() => setSelectedVariantId(variant._id)}
+                                                className={`px-5 py-3 flex items-center justify-center text-[10px] font-bold uppercase tracking-widest rounded-xl border transition-all duration-300 ${isSelected ? 'bg-[#ffd700] text-black border-[#ffd700] shadow-[0_0_15px_rgba(255,215,0,0.2)]' : 'bg-[#131313] border-white/10 text-[#999077] hover:border-white/30 hover:text-white'}`}
+                                            >
+                                                {attrString}
+                                            </button>
+                                        );
+                                    })}
+                                 </div>
+                            </div>
+                        )}
 
                         {/* Action Buttons */}
                         <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                            <button className="flex-1 px-10 py-5 bg-[#ffd700] text-black font-bold uppercase tracking-widest text-xs rounded-2xl hover:scale-[1.02] transition-all duration-300 shadow-[0_0_40px_rgba(255,215,0,0.15)] flex items-center justify-center gap-3 active:scale-95">
-                                Add to Vault
+                            <button className="flex-1 px-8 py-3.5 bg-[#ffd700] text-black font-bold uppercase tracking-widest text-[10px] rounded-lg hover:scale-[1.02] transition-all duration-300 shadow-[0_4px_20px_rgba(255,215,0,0.15)] flex items-center justify-center gap-3 active:scale-95">
+                                Add to Cart
                             </button>
-                            <button className="flex-1 px-10 py-5 bg-transparent border border-[#ffd700]/30 text-[#ffd700] font-bold uppercase tracking-widest text-xs rounded-2xl hover:bg-[#ffd700]/5 hover:border-[#ffd700] transition-all duration-300 flex items-center justify-center active:scale-95">
-                                Acquire Now
+                            <button className="flex-1 px-8 py-3.5 bg-transparent border border-[#ffd700]/30 text-[#ffd700] font-bold uppercase tracking-widest text-[10px] rounded-lg hover:bg-[#ffd700]/5 hover:border-[#ffd700] transition-all duration-300 flex items-center justify-center active:scale-95">
+                                Buy Now
                             </button>
                         </div>
 

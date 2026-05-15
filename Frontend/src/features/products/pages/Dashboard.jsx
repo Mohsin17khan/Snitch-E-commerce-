@@ -89,6 +89,7 @@ const formatPrice = (amount, currency = 'INR') => {
 const ProductCard = ({ product, onEdit, onDelete }) => {
   const [imgError, setImgError] = useState(false);
   const imageUrl = product?.images?.[0]?.url;
+  const navigate = useNavigate();
 
   return (
     <div
@@ -113,7 +114,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
           <img
             src={imageUrl}
             alt={product.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full cursor-pointer object-cover transition-transform duration-500 group-hover:scale-105"
             onError={() => setImgError(true)}
           />
         ) : (
@@ -195,7 +196,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
               e.currentTarget.style.background = 'transparent';
               e.currentTarget.style.color = '#d0c6ab';
             }}
-          >
+           >
             <EditIcon />
             Edit
           </button>
@@ -239,7 +240,7 @@ const Dashboard = () => {
   }, []);
 
   const handleEdit = product => {
-    navigate(`/products/edit/${product._id}`, { state: { product } });
+    navigate(`/sellerProduct/${product._id}`, { state: { product } });
   };
 
   const handleDelete = productId => {

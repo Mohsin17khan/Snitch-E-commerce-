@@ -6,6 +6,7 @@ import Dashboard from "../features/products/pages/Dashboard";
 import CreateProduct from "../features/products/pages/CreateProduct";
 import Home from "../features/products/pages/Home";
 import ProductDetailed from "../features/products/pages/ProductDetailed";
+import SellerProductDetailed from "../features/products/pages/SellerProductDetailed";
 
 export const router = createBrowserRouter([
   {
@@ -30,8 +31,10 @@ export const router = createBrowserRouter([
   },
    {
     path:"/product/detail/:productId",
-    element:  <ProductDetailed/>
+    element: <ProductDetailed/>  
   },
-  
-  
+   {
+    path:"/sellerProductVarient/:productId",
+    element: <Protected role="seller"> <SellerProductDetailed/> </Protected>
+  },  
 ]);

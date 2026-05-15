@@ -74,3 +74,68 @@ export const getProductDetail = async ( req, res ) => {
         product
     })
 }
+
+
+export const setProductVariant = async ( req, res ) => {
+    const productId = req.params.productId
+    const product = await productModel.findOne({
+        _id: productId,
+        seller: req.user._id
+    });
+    if(!product){
+        return res.status(401).json({
+            message:"Product not found"
+        })
+    }
+    const files = req.files;
+    const images = [];
+
+    if(files && files.length > 0 ){
+        ( await Promise.all(files.map(async ( file) => {
+            const image = await uploadFiles({
+                buffer: file.buffer,
+                fileName: file.originalname
+            });
+            return image
+        }))).map( image  => images.push(image))
+    }
+
+    const priceAmount = req.body.priceAmount
+    const priceCurrency = req.body.priceCurrency
+    const stock = req.body.stock
+    const attributes =  JSON.parse(req.body.attributes ||  "{}" );
+    
+    // Validate required fields
+    if (!priceAmount && priceAmount !== 0) {
+        return res.status(400).json({
+            message: "Price amount is required"
+        });
+    }
+
+    const variantPrice = Number(priceAmount);
+    if (isNaN(variantPrice)) {
+        return res.status(400).json({
+            message: "Price amount must be a valid number"
+        });
+    }
+
+
+    product.variants.push({
+        price: {
+            amount: variantPrice,
+            currency: priceCurrency || product.price.priceCurrency
+        },
+        stock: Number(stock) || 0,
+        images,
+        attributes
+    })  
+
+    await product.save()
+
+    return res.status(201).json({
+        message:"Product Variant added successfully",
+        success: true,
+        product
+    });
+
+} 

@@ -92,6 +92,7 @@ const ProductCard = ({ product }) => {
                         <ShoppingCartIcon />
                     </button>
                 </div>
+
             </div>
             
             {/* Corner Accent */}
