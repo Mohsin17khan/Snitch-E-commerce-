@@ -3,12 +3,11 @@ import { useSelector } from 'react-redux';
 import { useProduct } from '../hook/useProduct';
 import { Navigate, useNavigate } from 'react-router';
 
-/* -- Icon Helpers -- */
-const SearchIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-  </svg>
-);
+const ArrowRightIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+    </svg>
+)
 
 const ShoppingCartIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -16,12 +15,6 @@ const ShoppingCartIcon = () => (
     <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
   </svg>
 );
-
-const ArrowRightIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-    </svg>
-)
 
 const formatPrice = (amount, currency = 'INR') => {
   try {
@@ -120,29 +113,7 @@ const Home = () => {
             />
 
             {/* Navigation / Header */}
-            <nav className="fixed top-0 w-full z-50 backdrop-blur-xl bg-[#131313]/80 border-b border-white/5">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <div className="text-2xl font-bold tracking-[0.4em] font-['Space_Grotesk'] text-[#ffd700]">
-                        SNITCH
-                    </div>
-                    
-                    <div className="hidden md:flex items-center gap-10 text-[11px] uppercase tracking-[0.3em] font-medium text-[#d0c6ab]">
-                        <a href="#" className="hover:text-[#ffd700] transition-colors">Intelligence</a>
-                        <a href="#" className="hover:text-[#ffd700] transition-colors">Operations</a>
-                        <a href="#" className="hover:text-[#ffd700] transition-colors">Archive</a>
-                    </div>
-
-                    <div className="flex items-center gap-6">
-                        <button className="p-2 hover:bg-white/5 rounded-full transition-colors">
-                            <SearchIcon />
-                        </button>
-                        <button className="p-2 hover:bg-white/5 rounded-full transition-colors relative">
-                            <ShoppingCartIcon />
-                            <span className="absolute top-1 right-1 w-2 h-2 bg-[#ffd700] rounded-full"></span>
-                        </button>
-                    </div>
-                </div>
-            </nav>
+         
 
             {/* Hero Section */}
             <section className="relative pt-40 pb-24 px-6 overflow-hidden">

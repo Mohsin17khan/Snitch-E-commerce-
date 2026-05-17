@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useProduct } from '../hook/useProduct';
+import { useCart } from '../../cart/hooks/useCart';
 
 /* -- Icon Helpers -- */
 const ArrowLeftIcon = () => (
@@ -48,6 +49,11 @@ const ProductDetailed = () => {
     const [selectedVariantId, setSelectedVariantId] = useState(null);
     const navigate = useNavigate();
 
+    // for cart operations
+    const { handleCartItems } = useCart();
+
+  
+
     async function fetchDetail() {
         setLoading(true);
         try {
@@ -65,10 +71,11 @@ const ProductDetailed = () => {
     }, [productId]);
 
     useEffect(() => {
-        if (product?.variants?.length > 0 && !selectedVariantId) {
+        if (product?.variants?.length > 0) {
+            // Always set to first variant when product changes
             setSelectedVariantId(product.variants[0]._id);
         }
-    }, [product]);
+    }, [product?.variants]);
 
     useEffect(() => {
         setActiveImage(0);
@@ -80,7 +87,7 @@ const ProductDetailed = () => {
                 <div className="w-12 h-12 border-4 border-[#ffd700]/20 border-t-[#ffd700] rounded-full animate-spin"></div>
             </div>
         );
-    }
+    }   
 
     if (!product) {
         return (
@@ -91,7 +98,7 @@ const ProductDetailed = () => {
         );
     }
 
-    console.log(product);
+    // console.log(product);
     const selectedVariant = product.variants?.find(v => v._id === selectedVariantId) || null;
     
     const displayPriceAmount = selectedVariant?.price?.amount > 0 
@@ -105,6 +112,19 @@ const ProductDetailed = () => {
         : product.images || [];
         
     const currentImage = displayImages?.[activeImage]?.url;
+    
+    const handleAddToCart = async () => {
+        try {
+            const response = await handleCartItems({ 
+                productId: product._id, 
+                variantId: selectedVariantId, 
+                quantity: 1 
+            });
+        } catch (error) {
+            console.error("Cart operation failed:", error);
+
+        }
+    }
 
     return (
         <div className="min-h-screen bg-[#131313] text-[#e5e2e1] selection:bg-[#ffd700]/30 font-['Inter'] overflow-x-hidden">
@@ -114,32 +134,7 @@ const ProductDetailed = () => {
                 href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
             />
 
-            {/* Top Navigation Bar */}
-            <nav className="fixed top-0 w-full z-50 backdrop-blur-xl bg-[#131313]/80 border-b border-white/5">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <button 
-                        onClick={() => navigate(-1)}
-                        className="p-2 hover:bg-white/5 rounded-full transition-colors group flex items-center gap-3"
-                    >
-                        <ArrowLeftIcon />
-                        <span className="text-[10px] uppercase tracking-[0.2em] font-bold hidden md:block group-hover:text-[#ffd700] transition-colors">Back to Archive</span>
-                    </button>
-                    
-                    <div className="text-xl font-bold tracking-[0.4em] font-['Space_Grotesk'] text-[#ffd700] absolute left-1/2 -translate-x-1/2">
-                        SNITCH
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        <button className="p-2 hover:bg-white/5 rounded-full transition-colors">
-                            <ShareIcon />
-                        </button>
-                        <button className="p-2 hover:bg-white/5 rounded-full transition-colors">
-                            <HeartIcon />
-                        </button>
-                    </div>
-                </div>
-            </nav>
-
+         
             <main className="max-w-7xl mx-auto px-6 pt-32 pb-24">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 xl:gap-24">
                     
@@ -267,7 +262,9 @@ const ProductDetailed = () => {
 
                         {/* Action Buttons */}
                         <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                            <button className="flex-1 px-8 py-3.5 bg-[#ffd700] text-black font-bold uppercase tracking-widest text-[10px] rounded-lg hover:scale-[1.02] transition-all duration-300 shadow-[0_4px_20px_rgba(255,215,0,0.15)] flex items-center justify-center gap-3 active:scale-95">
+                            <button 
+                                onClick={handleAddToCart}
+                                className="flex-1 px-8 py-3.5 bg-[#ffd700] text-black font-bold uppercase tracking-widest text-[10px] rounded-lg hover:scale-[1.02] transition-all duration-300 shadow-[0_4px_20px_rgba(255,215,0,0.15)] flex items-center justify-center gap-3 active:scale-95">
                                 Add to Cart
                             </button>
                             <button className="flex-1 px-8 py-3.5 bg-transparent border border-[#ffd700]/30 text-[#ffd700] font-bold uppercase tracking-widest text-[10px] rounded-lg hover:bg-[#ffd700]/5 hover:border-[#ffd700] transition-all duration-300 flex items-center justify-center active:scale-95">

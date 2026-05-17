@@ -205,27 +205,7 @@ const SellerProductDetailed = () => {
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
       />
 
-      {/* Header */}
-      <nav className="fixed top-0 w-full z-50 backdrop-blur-xl bg-[#131313]/80 border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-white/5 rounded-full transition-colors group flex items-center gap-3"
-          >
-            <ArrowLeftIcon />
-            <span className="text-[10px] uppercase tracking-[0.2em] font-bold hidden md:block group-hover:text-[#ffd700] transition-colors">
-              Back to Dashboard
-            </span>
-          </button>
-          <div className="text-xl font-bold tracking-[0.4em] font-['Space_Grotesk'] text-[#ffd700] absolute left-1/2 -translate-x-1/2">
-            SNITCH{" "}
-            <span className="text-[10px] tracking-widest text-[#4d4732] ml-2 uppercase font-medium">
-              Ops
-            </span>
-          </div>
-          <div className="w-10"></div>
-        </div>
-      </nav>
+  
 
       <main className="max-w-7xl mx-auto px-6 pt-32 pb-24 flex flex-col gap-12">
         {/* Product Summary Card */}

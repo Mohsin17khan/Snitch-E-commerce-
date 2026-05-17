@@ -7,12 +7,11 @@ import CreateProduct from "../features/products/pages/CreateProduct";
 import Home from "../features/products/pages/Home";
 import ProductDetailed from "../features/products/pages/ProductDetailed";
 import SellerProductDetailed from "../features/products/pages/SellerProductDetailed";
+import Cart from "../features/cart/pages/Cart";
+import AppLayout from "./AppLayout";
 
 export const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Home/>,
-  },
+
   {
     path: "/register",
     element: <Register />,
@@ -21,20 +20,35 @@ export const router = createBrowserRouter([
     path: "/login",
     element: <Login />,
   },
-   {
-    path:"/seller/dashboard",
-    element:  <Protected role="seller"> <Dashboard/> </Protected> 
-  },
-   {
-    path:"/seller/create",
-    element:  <Protected role="seller"> <CreateProduct/> </Protected> 
-  },
-   {
-    path:"/product/detail/:productId",
-    element: <ProductDetailed/>  
-  },
-   {
-    path:"/sellerProductVarient/:productId",
-    element: <Protected role="seller"> <SellerProductDetailed/> </Protected>
-  },  
+  {
+    element: <AppLayout />,
+    children: [
+      {
+        path: "/",
+        element: <Home />,
+      },
+      {
+        path: "/seller/dashboard",
+        element: <Protected role="seller"> <Dashboard /> </Protected>
+      },
+      {
+        path: "/seller/create",
+        element: <Protected role="seller"> <CreateProduct /> </Protected>
+      },
+      {
+        path: "/product/detail/:productId",
+        element: <ProductDetailed />
+      },
+      {
+        path: "/sellerProductVarient/:productId",
+        element: <Protected role="seller"> <SellerProductDetailed /> </Protected>
+      },
+      {
+        path: "/cart",
+        element: <Protected> <Cart /> </Protected>
+      }
+    ]
+  }
+
+
 ]);

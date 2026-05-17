@@ -240,7 +240,7 @@ const Dashboard = () => {
   }, []);
 
   const handleEdit = product => {
-    navigate(`/sellerProduct/${product._id}`, { state: { product } });
+    navigate(`/sellerProductVarient/${product._id}`, { state: { product } });
   };
 
   const handleDelete = productId => {
