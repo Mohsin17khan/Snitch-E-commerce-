@@ -2,22 +2,17 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useCart } from "../hooks/useCart";
 import { Trash2, Plus, Minus, ArrowRight, ShoppingBag } from "lucide-react";
+import {  useNavigate } from 'react-router';
 
 const Cart = () => {
-  const cartItems = useSelector((state) => state.cart.items);
-  const { handleGetCartItems } = useCart();
+  const navigate = useNavigate()
+  const cart = useSelector((state) => state.cart.items);
+  const { handleGetCartItems, handleIncrementCartItem , handleDecrementCartItems, handleRemoveCartItem } = useCart();
 
   useEffect(() => {
     handleGetCartItems();
-  }, [handleGetCartItems]);
+  }, [  ]);
 
-  // Calculate totals
-  const subtotal = cartItems.reduce(
-    (acc, item) => acc + item.price.amount * item.quantity,
-    0,
-  );
-  const shipping = subtotal > 0 ? 99 : 0; // Flat shipping rate if cart not empty
-  const total = subtotal + shipping;
 
   return (
     <div className="min-h-screen bg-[#131313] text-[#e5e2e1]   py-32 px-4 sm:px-6 lg:px-8">
@@ -29,7 +24,7 @@ const Cart = () => {
           </h1>
         </div>
 
-        {cartItems.length === 0 ? (
+        {cart?.items?.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 bg-[#1c1b1b] rounded-lg border border-[#4d4732]/15">
             <ShoppingBag className="w-16 h-16 text-[#d0c6ab] mb-4 opacity-50" />
             <h2 className="text-2xl font-['Space_Grotesk'] text-[#e5e2e1] mb-2">
@@ -38,7 +33,9 @@ const Cart = () => {
             <p className="text-[#d0c6ab] mb-8">
               Looks like you haven't added anything yet.
             </p>
-            <button className="px-8 py-3 bg-[#ffd700] text-[#3a3000] font-medium rounded-md hover:brightness-110 transition-all shadow-[0_0_15px_rgba(255,215,0,0.3)]">
+            <button 
+            onClick={()=>navigate("/")}
+            className="px-8 py-3 bg-[#ffd700] text-[#3a3000] font-medium rounded-md hover:brightness-110 transition-all shadow-[0_0_15px_rgba(255,215,0,0.3)]">
               Continue Shopping
             </button>
           </div>
@@ -46,14 +43,15 @@ const Cart = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             {/* Cart Items List */}
             <div className="lg:col-span-8 space-y-6">
-              {cartItems.map((item) => {
-                const variantData = item.product.variants.find(
-                  (v) => v._id === item.variant,
-                );
+              {cart?.items?.map((item) => {
+                const variantData = item.product?.variants;
                 const image =
                   variantData?.images?.[0]?.url ||
                   item.product.images?.[0]?.url;
                 const attributes = variantData?.attributes || {};
+                const newPrice = item.product.price.priceAmount;
+                const oldPrice = variantData?.price?.amount;
+                console.log(newPrice, oldPrice)
 
                 return (
                   <div
@@ -87,7 +85,7 @@ const Cart = () => {
                           </p>
 
                           {/* Attributes */}
-                          <div className="flex flex-wrap gap-2 mb-4">
+                          <div className="flex flex-wrap gap-2 mb-4 items-center">
                             {Object.entries(attributes).map(([key, val]) => (
                               <span
                                 key={key}
@@ -96,28 +94,56 @@ const Cart = () => {
                                 {key.trim()}: {val}
                               </span>
                             ))}
+                            <span className={`px-3 py-1 text-xs rounded border font-medium ${
+                              variantData?.stock > 0 
+                                ? "bg-green-500/10 text-green-400 border-green-500/30" 
+                                : "bg-red-500/10 text-red-400 border-red-500/30"
+                            }`}>
+                              Stock: {variantData?.stock || 0}
+                            </span>
                           </div>
                         </div>
                         <p className="text-lg font-medium whitespace-nowrap text-[#e5e2e1]">
-                          ₹{item.price.amount.toLocaleString("en-IN")}
+                          ₹{newPrice}
                         </p>
                       </div>
+                      <p>{
+                        newPrice !== oldPrice  && (
+                          <>
+                          {
+                            oldPrice > newPrice
+                             ? <p className="text-green-600 text-[15px] font-bold "> You will save { oldPrice - newPrice } buy this at  { newPrice } </p>
+                             : <p className="text-red-600 text-[15px] font-bold"> Warning this product will cost You  {newPrice - oldPrice} more. </p>
+                          }
+                          </>
+                        )
+
+                        }</p>
 
                       {/* Controls */}
                       <div className="flex justify-between items-center mt-auto">
                         <div className="flex items-center gap-1 bg-[#131313] p-1 rounded-md border border-[#4d4732]/20">
-                          <button className="p-1.5 text-[#d0c6ab] hover:text-[#ffd700] transition-colors rounded hover:bg-[#2a2a2a]">
+                          <button 
+                          onClick={() => handleDecrementCartItems({ productId: item.product._id, variantId: item.variant })}  
+                          className="p-1.5 text-[#d0c6ab] hover:text-[#ffd700] transition-colors rounded hover:bg-[#2a2a2a]">
                             <Minus className="w-4 h-4" />
                           </button>
                           <span className="w-10 text-center font-medium text-sm text-[#e5e2e1]">
                             {item.quantity}
                           </span>
-                          <button className="p-1.5 text-[#d0c6ab] hover:text-[#ffd700] transition-colors rounded hover:bg-[#2a2a2a]">
+                          <button 
+                          onClick={() =>  handleIncrementCartItem({ productId: item.product._id, variantId: item.variant })}
+                           className="p-1.5 text-[#d0c6ab] hover:text-[#ffd700] transition-colors rounded hover:bg-[#2a2a2a]">
                             <Plus className="w-4 h-4" />
                           </button>
+
+                  
                         </div>
 
-                        <button className="text-[#d0c6ab] hover:text-[#ffb4ab] flex items-center gap-1 text-sm font-medium transition-colors">
+                        <button 
+                          onClick={() => handleRemoveCartItem({ productId: item.product._id, variantId: item.variant })}
+                          className="text-[#d0c6ab] hover:text-[#ffb4ab] flex items-center gap-1 text-sm font-medium transition-colors"
+                        >
                           <Trash2 className="w-4 h-4" />
                           <span>Remove</span>
                         </button>
@@ -139,19 +165,21 @@ const Cart = () => {
                   <div className="flex justify-between">
                     <span>Subtotal</span>
                     <span className="text-[#e5e2e1]">
-                      ₹{subtotal.toLocaleString("en-IN")}
+                      ₹{cart.totalPrice}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Shipping</span>
                     <span className="text-[#e5e2e1]">
-                      ₹{shipping.toLocaleString("en-IN")}
+                      {
+                        cart.totalPrice >= 4000 ? "99" : "Complimentary" 
+                      }
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Taxes</span>
                     <span className="text-[#e5e2e1]">
-                      Calculated at checkout
+                      Included
                     </span>
                   </div>
                 </div>
@@ -161,7 +189,7 @@ const Cart = () => {
                     Total
                   </span>
                   <span className="text-3xl font-medium font-['Space_Grotesk'] text-[#ffd700]">
-                    ₹{total.toLocaleString("en-IN")}
+                    ₹{cart.totalPrice}
                   </span>
                 </div>
 

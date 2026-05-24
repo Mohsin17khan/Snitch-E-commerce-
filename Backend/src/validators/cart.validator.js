@@ -17,3 +17,11 @@ export const validateAddToCart = [
     
     validateResult
 ]
+
+
+export const validateCartItems = [
+    param('productId').isMongoId().withMessage('Invalid product ID'),
+    param('variantId').optional().isMongoId().withMessage('Invalid variant ID'), 
+    
+    validateResult
+]

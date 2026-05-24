@@ -1,6 +1,7 @@
 import { stockOfVariant } from "../dao/stock.dao.js";
 import productModel from "../models/product.model.js";
 import cartModel from "../models/cart.model.js";    
+import mongoose from "mongoose";
 
 
 export const addToCart = async ( req, res ) => {
@@ -74,7 +75,62 @@ export const addToCart = async ( req, res ) => {
 export const getCart = async ( req, res ) => {
     const user = req.user
 
-    let cart = await cartModel.findOne({ user: user._id }).populate("items.product");
+    let cart = (await cartModel.aggregate(
+          [
+    {
+      $match: {
+        user: new mongoose.Types.ObjectId(user._id)
+      }
+    },
+    { $unwind: { path: '$items' } },
+    {
+      $lookup: {
+        from: 'products',
+        localField: 'items.product',
+        foreignField: '_id',
+        as: 'items.product'
+      }
+    },
+    { $unwind: { path: '$items.product' } },
+    {
+      $unwind: { path: '$items.product.variants' }
+    },
+    {
+      $match: {
+        $expr: {
+          $eq: [
+            '$items.variant',
+            '$items.product.variants._id'
+          ]
+        }
+      }
+    },
+    {
+      $addFields: {
+        itemPrice: {
+          price: {
+            $multiply: [
+              '$items.quantity',
+              '$items.product.variants.price.amount'
+            ]
+          },
+          currency:
+            '$items.product.variants.price.currency'
+        }
+      }
+    },
+    {
+      $group: {
+        _id: '$_id',
+        totalPrice: { $sum: '$itemPrice.price' },
+        currency: {
+          $first: '$itemsPrice.currency'
+        },
+        items: { $push: '$items' }
+      }
+    }
+  ])) [0];
+
     if(!cart) {
         cart = await cartModel.create({ user: user._id });
     }
@@ -83,4 +139,110 @@ export const getCart = async ( req, res ) => {
         success: true,
         cart
      });
+}
+
+export const incrementCartItem = async ( req, res ) => {
+ const { productId, variantId } = req.params;
+
+ const product = await productModel.findOne({
+    _id: productId,
+    "variants._id": variantId
+});
+if(!product) {
+    return res.status(404).json({
+         message: "Product not found"
+   })   
+}
+
+const cart = await cartModel.findOne({ user: req.user._id });   
+
+if(!cart) {
+    return res.status(404).json({
+         message: "Cart not found"
+   })   
+}   
+
+const stock = await stockOfVariant(productId, variantId);
+const itemQuantityInCart = cart.items.find(item => item.product.toString() === productId && item.variant.toString() === variantId)?.quantity || 0;
+
+if( itemQuantityInCart + 1 > stock ) {
+    return res.status(400).json({ 
+        message:`Only ${ stock } items left in stock , you have already added ${ itemQuantityInCart } items to your cart`
+    })  
+}
+
+await cartModel.findOneAndUpdate(
+    { user: req.user._id, "items.product": productId, "items.variant": variantId },
+    { $inc: { "items.$.quantity": 1 } },
+    { new: true }
+)   
+return res.status(200).json({   
+    message: "Cart item quantity incremented successfully",
+    success: true
+})
+
+}
+
+
+export const decrementCartItem = async ( req, res ) => {
+    const { productId, variantId } = req.params;
+
+    const product = await productModel.findOne({    
+        _id: productId,
+        "variants._id": variantId
+    });
+    if(!product) {
+        return res.status(404).json({
+             message: "Product not found"
+       })   
+    }
+
+    const cart = await cartModel.findOne({ user: req.user._id });
+
+    if(!cart) {
+        return res.status(404).json({
+             message: "Cart not found"
+       })   
+    }
+
+    const stock = await stockOfVariant(productId, variantId);
+    const itemQuantityInCart = cart.items.find(item => item.product.toString() === productId && item.variant.toString() === variantId)?.quantity || 0;
+
+    if( itemQuantityInCart - 1 < 0 ) {
+        return res.status(400).json({ 
+            message:`You have only ${ itemQuantityInCart } items in your cart`
+        })  
+    }
+
+    await cartModel.findOneAndUpdate(
+        { user: req.user._id, "items.product": productId, "items.variant": variantId },
+        { $inc: { "items.$.quantity": -1 } },
+        { new: true }
+    );
+
+    return res.status(200).json({
+        message: "Cart item quantity decremented successfully",
+        success: true
+    });
+
+}
+
+export const removeCartItem = async ( req, res ) => {
+    const { productId, variantId } = req.params;    
+    const cart = await cartModel.findOne({ user: req.user._id });
+
+    if(!cart) {
+        return res.status(404).json({
+                message: "Cart not found"
+        })   
+    }
+    await cartModel.findOneAndUpdate(
+        { user: req.user._id },
+        { $pull: { items: { product: productId, variant: variantId } } },
+        { new: true }
+    );
+    return res.status(200).json({
+        message: "Cart item removed successfully",
+        success: true
+    });
 }
