@@ -104,6 +104,7 @@ const Home = () => {
         handleGetAllProducts();
     }, []);
 
+
     return (
         <div className="min-h-screen bg-[#131313] text-[#e5e2e1] selection:bg-[#ffd700]/30 overflow-x-hidden">
             {/* Google Fonts */}

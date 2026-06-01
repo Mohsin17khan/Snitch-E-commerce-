@@ -120,6 +120,7 @@ const ProductDetailed = () => {
                 variantId: selectedVariantId, 
                 quantity: 1 
             });
+            console.log("here is the cart", response)
         } catch (error) {
             console.error("Cart operation failed:", error);
 

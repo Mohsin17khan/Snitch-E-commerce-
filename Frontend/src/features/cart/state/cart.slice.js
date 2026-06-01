@@ -10,9 +10,10 @@ const cartSlice = createSlice({
     },
     reducers: {
         setItems: (state, action) => {
-            state.items = action.payload;
-            state.totalPrice = action.payload.totalPrice;
-            state.currency = action.payload.currency;
+            const cartData = action.payload;
+            state.items = cartData.items || [];
+            state.totalPrice = cartData.totalPrice || 0;
+            state.currency = cartData.currency || "INR";
         },
         addItems: (state, action) => {
             state.items.push(action.payload);
@@ -28,8 +29,8 @@ const cartSlice = createSlice({
                 } else {
                     return item;
                 }
-            })
-
+            });
+            state.totalPrice = state.items.reduce((total, item) => total + (item.product.price.priceAmount * item.quantity), 0);
         },
         decrementCartItem: (state, action) => {
             const { productId, variantId } = action.payload;
@@ -42,11 +43,13 @@ const cartSlice = createSlice({
                 } else {
                     return item;
                 }
-            })
+            });
+            state.totalPrice = state.items.reduce((total, item) => total + (item.product.price.priceAmount * item.quantity), 0);
         },
         removeCartItem: (state, action) => {
             const { productId, variantId } = action.payload;
             state.items = state.items.filter(item => !(item.product._id === productId && item.variant === variantId));
+            state.totalPrice = state.items.reduce((total, item) => total + (item.product.price.priceAmount * item.quantity), 0);
         }
     }
 })

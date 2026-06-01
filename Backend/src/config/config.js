@@ -15,11 +15,17 @@ if(!process.env.IMAGE_PRIVATE_KEY) {
     console.error('IMAGE_KIT_KEY is not defined in the environment variables.');
     process.exit(1); // Exit the application with an error code
 }
+if(!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    console.error('RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET is not defined in the environment variables.');
+    process.exit(1); // Exit the application with an error code 
+}
     
 export const config = {
     MONGO_URI: process.env.MONGO_URI,
     JWT_SECRET: process.env.JWT_SECRET,  
     GOOGLE_CLIENT_ID:process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
+    RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
     IMAGEKIT_PRIVATE_KEY: process.env.IMAGE_PRIVATE_KEY,
 }

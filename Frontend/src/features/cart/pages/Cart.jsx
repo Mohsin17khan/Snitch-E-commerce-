@@ -2,18 +2,59 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useCart } from "../hooks/useCart";
 import { Trash2, Plus, Minus, ArrowRight, ShoppingBag } from "lucide-react";
-import {  useNavigate } from 'react-router';
+import { useNavigate } from "react-router";
+import { useRazorpay } from "react-razorpay";
 
 const Cart = () => {
-  const navigate = useNavigate()
-  const cart = useSelector((state) => state.cart.items);
-  const { handleGetCartItems, handleIncrementCartItem , handleDecrementCartItems, handleRemoveCartItem } = useCart();
+  const navigate = useNavigate();
+  const cart = useSelector((state) => state.cart);
+  
+  const {
+    handleGetCartItems,
+    handleIncrementCartItem,
+    handleDecrementCartItems,
+    handleRemoveCartItem,
+    handleCreateOrder,
+    handleVerifyPayment
+  } = useCart();
+  const { error, isLoading, Razorpay } = useRazorpay();
+  const user = useSelector((state) => state.user)
 
   useEffect(() => {
     handleGetCartItems();
-  }, [  ]);
+  }, []);
 
+  async function handleCartOrder () {
+    const order = await handleCreateOrder();
 
+    const options = {
+      key: "rzp_test_SvrMJtgqzOAGJV",
+      amount: order.amount, // Amount in paise
+      currency: order.currency,
+      name: "Snitch",
+      description: "Test Transaction",
+      order_id: order.id, // Generate order_id on server
+      handler: async (response) => {
+        
+        const isValid = await handleVerifyPayment(response)
+        if(isValid){
+          navigate(`/order-success?order_id=${response?.razorpay_order_id}`)
+        }
+      },
+      prefill: {
+        name: user?.fullname,
+        email: user?.email,
+        contact: user?.contact,
+      },
+      theme: {
+        color: "#F37254",
+      },
+    }
+    const razorpayInstance = new Razorpay(options);
+    razorpayInstance.open();
+  }
+
+    
   return (
     <div className="min-h-screen bg-[#131313] text-[#e5e2e1]   py-32 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -24,7 +65,7 @@ const Cart = () => {
           </h1>
         </div>
 
-        {cart?.items?.length === 0 ? (
+        {(cart?.items?.length || 0) === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 bg-[#1c1b1b] rounded-lg border border-[#4d4732]/15">
             <ShoppingBag className="w-16 h-16 text-[#d0c6ab] mb-4 opacity-50" />
             <h2 className="text-2xl font-['Space_Grotesk'] text-[#e5e2e1] mb-2">
@@ -33,9 +74,10 @@ const Cart = () => {
             <p className="text-[#d0c6ab] mb-8">
               Looks like you haven't added anything yet.
             </p>
-            <button 
-            onClick={()=>navigate("/")}
-            className="px-8 py-3 bg-[#ffd700] text-[#3a3000] font-medium rounded-md hover:brightness-110 transition-all shadow-[0_0_15px_rgba(255,215,0,0.3)]">
+            <button
+              onClick={() => navigate("/")}
+              className="px-8 py-3 bg-[#ffd700] text-[#3a3000] font-medium rounded-md hover:brightness-110 transition-all shadow-[0_0_15px_rgba(255,215,0,0.3)]"
+            >
               Continue Shopping
             </button>
           </div>
@@ -51,8 +93,8 @@ const Cart = () => {
                 const attributes = variantData?.attributes || {};
                 const newPrice = item.product.price.priceAmount;
                 const oldPrice = variantData?.price?.amount;
-                console.log(newPrice, oldPrice)
 
+                console.log(newPrice, oldPrice)
                 return (
                   <div
                     key={item._id}
@@ -94,11 +136,13 @@ const Cart = () => {
                                 {key.trim()}: {val}
                               </span>
                             ))}
-                            <span className={`px-3 py-1 text-xs rounded border font-medium ${
-                              variantData?.stock > 0 
-                                ? "bg-green-500/10 text-green-400 border-green-500/30" 
-                                : "bg-red-500/10 text-red-400 border-red-500/30"
-                            }`}>
+                            <span
+                              className={`px-3 py-1 text-xs rounded border font-medium ${
+                                variantData?.stock > 0
+                                  ? "bg-green-500/10 text-green-400 border-green-500/30"
+                                  : "bg-red-500/10 text-red-400 border-red-500/30"
+                              }`}
+                            >
                               Stock: {variantData?.stock || 0}
                             </span>
                           </div>
@@ -107,41 +151,63 @@ const Cart = () => {
                           ₹{newPrice}
                         </p>
                       </div>
-                      <p>{
-                        newPrice !== oldPrice  && (
+                      <p>
+                        {newPrice !== oldPrice && (
                           <>
-                          {
-                            oldPrice > newPrice
-                             ? <p className="text-green-600 text-[15px] font-bold "> You will save { oldPrice - newPrice } buy this at  { newPrice } </p>
-                             : <p className="text-red-600 text-[15px] font-bold"> Warning this product will cost You  {newPrice - oldPrice} more. </p>
-                          }
+                            {oldPrice > newPrice ? (
+                              <p className="text-green-600 text-[15px] font-bold ">
+                                {" "}
+                                You will save {oldPrice - newPrice} buy this at{" "}
+                                {newPrice}{" "}
+                              </p>
+                            ) : (
+                              <p className="text-red-600 text-[15px] font-bold">
+                                {" "}
+                                Warning this product will cost You{" "}
+                                {newPrice - oldPrice} more.{" "}
+                              </p>
+                            )}
                           </>
-                        )
-
-                        }</p>
+                        )}
+                      </p>
 
                       {/* Controls */}
                       <div className="flex justify-between items-center mt-auto">
                         <div className="flex items-center gap-1 bg-[#131313] p-1 rounded-md border border-[#4d4732]/20">
-                          <button 
-                          onClick={() => handleDecrementCartItems({ productId: item.product._id, variantId: item.variant })}  
-                          className="p-1.5 text-[#d0c6ab] hover:text-[#ffd700] transition-colors rounded hover:bg-[#2a2a2a]">
+                          <button
+                            onClick={() =>
+                              handleDecrementCartItems({
+                                productId: item.product._id,
+                                variantId: item.variant,
+                              })
+                            }
+                            className="p-1.5 text-[#d0c6ab] hover:text-[#ffd700] transition-colors rounded hover:bg-[#2a2a2a]"
+                          >
                             <Minus className="w-4 h-4" />
                           </button>
                           <span className="w-10 text-center font-medium text-sm text-[#e5e2e1]">
                             {item.quantity}
                           </span>
-                          <button 
-                          onClick={() =>  handleIncrementCartItem({ productId: item.product._id, variantId: item.variant })}
-                           className="p-1.5 text-[#d0c6ab] hover:text-[#ffd700] transition-colors rounded hover:bg-[#2a2a2a]">
+                          <button
+                            onClick={() =>
+                              handleIncrementCartItem({
+                                productId: item.product._id,
+                                variantId: item.variant,
+                              })
+                            }
+                            className="p-1.5 text-[#d0c6ab] hover:text-[#ffd700] transition-colors rounded hover:bg-[#2a2a2a]"
+                          >
                             <Plus className="w-4 h-4" />
                           </button>
-
-                  
                         </div>
 
-                        <button 
-                          onClick={() => handleRemoveCartItem({ productId: item.product._id, variantId: item.variant })}
+                        <button
+                          onClick={() =>
+                            handleRemoveCartItem({
+                              productId: item.product._id,
+                              variantId: item.variant,
+                            })
+                          }
                           className="text-[#d0c6ab] hover:text-[#ffb4ab] flex items-center gap-1 text-sm font-medium transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -164,23 +230,17 @@ const Cart = () => {
                 <div className="space-y-4 text-sm text-[#d0c6ab] border-b border-[#4d4732]/20 pb-6 mb-6">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span className="text-[#e5e2e1]">
-                      ₹{cart.totalPrice}
-                    </span>
+                    <span className="text-[#e5e2e1]">₹{cart.totalPrice}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Shipping</span>
                     <span className="text-[#e5e2e1]">
-                      {
-                        cart.totalPrice >= 4000 ? "99" : "Complimentary" 
-                      }
+                      {cart.totalPrice >= 4000 ? "99" : "Complimentary"}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Taxes</span>
-                    <span className="text-[#e5e2e1]">
-                      Included
-                    </span>
+                    <span className="text-[#e5e2e1]">Included</span>
                   </div>
                 </div>
 
@@ -193,7 +253,11 @@ const Cart = () => {
                   </span>
                 </div>
 
-                <button className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-[#ffd700] to-[#e9c400] text-[#221b00] font-semibold rounded-lg hover:brightness-110 transition-all shadow-[0_0_20px_rgba(255,215,0,0.25)]">
+                <button
+                  onClick={handleCartOrder}
+                  // onClick={handlePayment}
+                  className="w-full cursor-pointer flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-[#ffd700] to-[#e9c400] text-[#221b00] font-semibold rounded-lg hover:brightness-110 active:scale-95 active:brightness-90 transition-all shadow-[0_0_20px_rgba(255,215,0,0.25)]"
+                >
                   Proceed to Checkout
                   <ArrowRight className="w-5 h-5" />
                 </button>

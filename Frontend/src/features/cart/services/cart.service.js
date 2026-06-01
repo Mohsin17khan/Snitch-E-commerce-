@@ -74,3 +74,32 @@ export const removeCartItemApi = async ({ productId, variantId }) => {
         };
     }       
 }
+
+
+export const createOrderApi = async () => {
+    try {
+        const response = await cartApiInstance.post("/payment/create-order");
+        return response.data;
+    }
+    catch (error) { 
+        console.error("Error creating order:", error);
+        return {
+            success: false,
+            message: error.response?.data?.message || error.message || "Failed to create order"
+        };
+    }
+}
+
+export const verifyPaymentApi = async ( { razorpay_order_id ,razorpay_payment_id, razorpay_signature }) => {
+    const response = await cartApiInstance.post("/payment/order-verify", { razorpay_order_id ,razorpay_payment_id, razorpay_signature });
+    try {
+        return response.data;
+    }
+    catch (error) { 
+        console.error("Error verifying payment:", error);
+        return {
+            success: false,
+            message: error.response?.data?.message || error.message || "Failed to verify payment"
+        };  
+    } 
+}
